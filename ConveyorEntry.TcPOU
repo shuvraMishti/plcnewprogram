@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="ConveyorEntry" Id="{5d697ee2-3acb-4ff2-bd79-036fcf3678d1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK ConveyorEntry
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	ConveyorEntryToken : INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//If emergency button is activated or system isn't started or stopped, reset system token to 10.
+IF NOT SystemStarted OR EmergencyActivated THEN
+	ConveyorEntryToken := 10;
+END_IF
+//Conveyor entry system conditions.
+CASE ConveyorEntryToken OF
+	//
+	10:
+		//Waiting for system start
+		IF SystemStarted THEN
+			ConveyorEntryToken := 20;
+		END_IF
+	20:
+		//Start conveyor entry motor when system is started. Continue to work until pallet is loaded or if loaded already , work until pallet sensor activates.
+		Conveyor_Entry := TRUE;
+		IF TransferBusy AND Pallet_Sensor THEN
+			ConveyorEntryToken := 30;
+		ELSIF NOT TransferBusy AND Loaded THEN
+			ConveyorEntryToken := 30;
+		END_IF
+	30:
+		//Stop until pallet is pushed one side completely. 
+		Conveyor_Entry := FALSE;
+		IF NOT TransferBusy AND NOT Loaded THEN
+			ConveyorEntryToken := 20;
+		END_IF
+ELSE
+	ConveyorEntryToken := 10;
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="ConveyorEntry">
+      <LineId Id="27" Count="3" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

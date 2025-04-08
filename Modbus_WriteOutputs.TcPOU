@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="Modbus_WriteOutputs" Id="{77270b2f-8847-45cf-8f39-b2c5ab815a1b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Modbus_WriteOutputs
+VAR
+	bWriteOutput: BOOL;
+	tWriteOutput: TON;
+	WriteOutputs: FB_MBWriteCoils;
+
+	ModbusWriteSingle: FB_MBWriteSingleReg;
+	ModbusSingleWrite: TON;
+	bWriteSingleReg: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Modbus write outputs function.
+tWriteOutput(IN:= NOT WriteOutputs.bBusy , PT:= T#10MS, Q=> bWriteOutput , ET=> );
+
+WriteOutputs(
+	sIPAddr:= '127.0.0.1', 
+	nTCPPort:= 505, 
+	nUnitID:= 255, 
+	nQuantity:= 10, 
+	nMBAddr:= 0, 
+	cbLength:= SIZEOF(OutputArea), 
+	pSrcAddr:= ADR(OutputArea), 
+	bExecute:= bWriteOutput, 
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+
+ModbusSingleWrite(IN:= NOT ModbusWriteSingle.bBusy, PT:=T#10MS , Q=> bWriteSingleReg, ET=> );
+	
+ModbusWriteSingle(
+	sIPAddr:= '127.0.0.1', 
+	nTCPPort:= 505, 
+	nUnitID:= 255, 
+	nMBAddr:= 0, 
+	nValue:= BoxCounted, 
+	bExecute:= bWriteSingleReg, 
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+]]></ST>
+    </Implementation>
+    <LineIds Name="Modbus_WriteOutputs">
+      <LineId Id="69" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="56" Count="11" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="82" Count="9" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="97" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

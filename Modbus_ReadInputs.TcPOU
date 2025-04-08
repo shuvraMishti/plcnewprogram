@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="Modbus_ReadInputs" Id="{afbc1203-c214-431a-8ef8-de537497029b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Modbus_ReadInputs
+VAR
+	bReadInputs : 	BOOL;
+	tReadInputs	: 	TON;
+	ReadInputs	: FB_MBReadInputs;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Modbus read inputs function.
+tReadInputs(IN:= NOT ReadInputs.bBusy, PT:= T#10MS , Q=> bReadInputs, ET=> );
+
+ReadInputs(
+	sIPAddr:= '127.0.0.1', 
+	nTCPPort:= 505, 
+	nUnitID:= 255, 
+	nQuantity:= 14, 
+	nMBAddr:= 0, 
+	cbLength:= SIZEOF(InputArea), 
+	pDestAddr:= ADR(InputArea), 
+	bExecute:= bReadInputs, 
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );
+	
+]]></ST>
+    </Implementation>
+    <LineIds Name="Modbus_ReadInputs">
+      <LineId Id="132" Count="0" />
+      <LineId Id="123" Count="1" />
+      <LineId Id="108" Count="12" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="121" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="TransferConveyor" Id="{d11d03f5-6453-43be-8072-36aeca7780e0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK TransferConveyor
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	TransferConveyorToken : INT;
+	PalletSensorNegEdge: F_TRIG;
+	LeftEntryPosEdge: R_TRIG;
+	RightEntryPosEdge: R_TRIG;
+	
+	PalletNegative : BOOL;
+	LeftEntryPositive : BOOL;
+	RightEntryPositive : BOOL;	
+
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//If emergency button is activated or system isn't started or stopped, reset system token to 10.
+IF NOT SystemStarted OR EmergencyActivated THEN
+	TransferConveyorToken := 10;
+END_IF
+//Positive or negative edges of sensors.
+PalletSensorNegEdge(CLK:= Pallet_Sensor, Q=> PalletNegative );
+LeftEntryPosEdge(CLK:= At_Left_Entry , Q=> LeftEntryPositive );
+RightEntryPosEdge(CLK:= At_Right_Entry , Q=> RightEntryPositive );
+//Transfer conveyors working conditions.
+CASE TransferConveyorToken OF
+	//
+	10:
+		//Waiting for system start
+		IF SystemStarted THEN
+			TransferConveyorToken := 20;
+		ELSE
+			Transfer_Left := FALSE;
+			Transfer_Right := FALSE;
+		END_IF
+	20:
+		//Reset everything and wait for a new pallet.
+		Load := FALSE;
+		Transfer_Left := FALSE;
+		Transfer_Right := FALSE;
+		TransferringLeft := FALSE;
+		TransferringRight := FALSE;
+		
+		IF Pallet_Sensor THEN
+			TransferConveyorToken := 30;
+		END_IF
+	30:
+		//Start loading conveyor until loaded sensor is activated. And decide where to transfer pallet according to low and high sensors.
+		Load := TRUE;
+		//
+		IF Pallet_Sensor AND Low_Sensor AND NOT High_Sensor THEN
+			TransferringLeft := TRUE;
+		ELSIF Pallet_Sensor AND Low_Sensor AND High_Sensor THEN
+			TransferringRight := TRUE;
+		ELSIF PalletNegative THEN
+			TransferBusy := TRUE;
+		ELSIF Loaded AND TransferringLeft THEN
+			TransferConveyorToken := 40;
+		ELSIF Loaded AND TransferringRight THEN
+			TransferConveyorToken := 50;
+		END_IF
+	
+	40:
+		//If the box is small, transfer it to left.
+		Load := FALSE;
+		Transfer_Left := TRUE;
+		
+		IF LeftEntryPositive THEN
+			TransferBusy := FALSE;
+			TransferConveyorToken := 10;
+		END_IF
+	
+		
+	50:
+		//If the box is high, transfer it to right.
+		Load := FALSE;
+		Transfer_Right := TRUE;
+		
+		IF RightEntryPositive THEN
+			TransferBusy := FALSE;
+			TransferConveyorToken := 10;
+		END_IF	
+		
+	ELSE
+		//
+		TransferConveyorToken := 10;
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="TransferConveyor">
+      <LineId Id="131" Count="0" />
+      <LineId Id="133" Count="1" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="32" Count="2" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="43" Count="3" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="47" Count="3" />
+      <LineId Id="68" Count="2" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="80" Count="2" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="84" Count="4" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="90" Count="3" />
+      <LineId Id="95" Count="1" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="97" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="105" Count="5" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="31" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

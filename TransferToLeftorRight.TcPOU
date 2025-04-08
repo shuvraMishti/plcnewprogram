@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="TransferToLeftorRight" Id="{174d7582-74a9-42e6-9100-ae2e28b59a99}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK TransferToLeftorRight
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	LeftExitPosEdge: R_TRIG;
+	LeftExitPositive: BOOL;
+	RightExitPosEdge: R_TRIG;
+	RightExitPositive: BOOL;
+	LeftConveyorCounter: CTUD;
+	RightConveyorCounter: CTUD;
+	BoxCounter: CTU;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+//Positive edges of the sensors.
+LeftExitPosEdge(CLK:= At_Left_Exit, Q=> LeftExitPositive );
+RightExitPosEdge(CLK:= At_Right_Exit, Q=> RightExitPositive);
+//Left conveyor box counter.
+LeftConveyorCounter(
+	CU:= NOT At_Left_Entry , 
+	CD:= LeftExitPositive, 
+	RESET:= EmergencyActivated, 
+	LOAD:= , 
+	PV:= , 
+	QU=> , 
+	QD=> , 
+	CV=> );
+//Right conveyor box counter.	
+RightConveyorCounter(
+	CU:= NOT At_Right_Entry, 
+	CD:= RightExitPositive, 
+	RESET:= EmergencyActivated, 
+	LOAD:= , 
+	PV:= , 
+	QU=> , 
+	QD=> , 
+	CV=> );
+//Left conveyor works until it is empty.
+IF NOT LeftConveyorCounter.QD THEN
+	Conveyor_Left := TRUE;
+ELSE
+	Conveyor_Left := FALSE;
+END_IF
+//Right conveyor works until it is empty.
+IF NOT RightConveyorCounter.QD THEN
+	Conveyor_Right := TRUE;
+ELSE
+	Conveyor_Right := FALSE;
+END_IF
+//Total box counter.
+BoxCounter(
+	CU:= LeftExitPositive OR RightExitPositive, 
+	RESET:= EmergencyActivated, 
+	PV:= , 
+	Q=> , 
+	CV=> );
+
+BoxCounted := BoxCounter.CV;
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="TransferToLeftorRight">
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="7" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="31" Count="7" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="47" Count="2" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="72" Count="4" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="79" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

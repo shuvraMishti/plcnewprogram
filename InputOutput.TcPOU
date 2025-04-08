@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="InputOutput" Id="{8d1c2be9-1b34-46ab-b213-d2a8ac13bfec}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM InputOutput
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Inputs
+High_Sensor 	:= InputArea[0].0;
+Low_Sensor 		:= InputArea[0].1;
+Pallet_Sensor 	:= InputArea[0].2;
+Loaded			:= InputArea[0].3;
+At_Left_Entry	:= InputArea[0].4;
+At_Left_Exit	:= InputArea[0].5;
+At_Right_Entry	:= InputArea[0].6;
+At_Right_Exit	:= InputArea[0].7;
+Start			:= InputArea[1].0;
+Reset			:= InputArea[1].1;
+Stop			:= InputArea[1].2;
+Emergency_Stop	:= InputArea[1].3;
+Auto			:= InputArea[1].4;
+FactoryIO_RUN	:= InputArea[1].5;
+//Outputs
+OutputArea[0].0	:= Conveyor_Entry;
+OutputArea[0].1 := Load;
+OutputArea[0].2 := Unload;
+OutputArea[0].3 := Transfer_Left;
+OutputArea[0].4 := Transfer_Right;
+OutputArea[0].5 := Conveyor_Left;
+OutputArea[0].6 := Conveyor_Right;
+OutputArea[0].7 := Start_Light;
+OutputArea[1].0 := Reset_Light;
+OutputArea[1].1 := Stop_Light;
+//If emergency stop is activated, reset all outputs and system memory bits to zero. 
+IF EmergencyActivated THEN
+	Conveyor_Entry		:= 0;
+	Load 				:= 0;
+	Unload 				:= 0;
+	Transfer_Left 		:= 0;
+	Transfer_Right 		:= 0;
+	Conveyor_Left 		:= 0;
+	Conveyor_Right 		:= 0;
+	Start_Light 		:= 0;
+	Stop_Light 			:= 0;
+	SystemStarted		:= FALSE;
+	TransferBusy		:= FALSE;
+	TransferringLeft	:= FALSE;
+	TransferringRight	:= FALSE;
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="InputOutput">
+      <LineId Id="76" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="49" Count="11" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="62" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="65" Count="7" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="84" Count="7" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="98" Count="1" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="100" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
